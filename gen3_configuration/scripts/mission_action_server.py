@@ -9,6 +9,7 @@ import rospy
 import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
+import time
 
 from math import pi, tau, dist, fabs, cos
 
@@ -54,8 +55,8 @@ class MissionActionServer(object):
         ## BEGIN_SUB_TUTORIAL setup
         ##
         ## First initialize `moveit_commander`_ and a `rospy`_ node:
-        self.joint_state_topic = ['joint_states:=/my_gen3/joint_states']
-        moveit_commander.roscpp_initialize(self.joint_state_topic)
+        # self.joint_state_topic = ['joint_states:=/my_gen3/joint_states']
+        moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node("mission_as", anonymous=True)
 
         self.degrees_of_freedom = rospy.get_param(
@@ -181,100 +182,34 @@ class MissionActionServer(object):
         return all_close(pose_goal, current_pose, 0.01)
 
     def plan_cartesian_path(self, scale=1):
-        # Copy class variables to local variables to make the web tutorials more clear.
-        # In practice, you should use the class variables directly unless you have a good
-        # reason not to.
+
         move_group = self.move_group
-        # move_group.set_max_velocity_scaling_factor(0.3)
-        # move_group.set_max_acceleration_scaling_factor(0.1)
-        ## BEGIN_SUB_TUTORIAL plan_cartesian_path
-        ##
-        ## Cartesian Paths
-        ## ^^^^^^^^^^^^^^^
-        ## You can plan a Cartesian path directly by specifying a list of waypoints
-        ## for the end-effector to go through. If executing  interactively in a
-        ## Python shell, set scale = 1.0.
-        ##
+
+        move_group.set_max_velocity_scaling_factor(0.03)
+        move_group.set_max_acceleration_scaling_factor(0.01)
+        move_group.set_num_planning_attempts(10)
+
         waypoints = []
 
         mtarget = moveit_commander.Pose()
-        # mtarget = geometry_msgs.msg.Pose()
-        mtarget.position.x = 0.4
-        mtarget.position.y = 0.1
-        mtarget.position.z = 0.4
-        mtarget.orientation.x = 0.0006745600176505448
-        mtarget.orientation.y = 0.7134677370703144
-        mtarget.orientation.z = -0.0058675983477976265
-        mtarget.orientation.w = 1.0
+        mtarget.position.x = 0.2596238372665062
+        mtarget.position.y = 0.5877850010083194
+        mtarget.position.z = 1.0238443039530603
+        mtarget.orientation.x = -0.5055357895603413
+        mtarget.orientation.y = 0.4986347640062258
+        mtarget.orientation.z = 0.5102174540797526
+        mtarget.orientation.w = 0.48525775331305615
 
-        # self.reach_cartesian_pose(mtarget, 0.01, None)
         waypoints.append(mtarget)
-
-
-        # wpose = move_group.get_current_pose().pose
-        # wpose.position.z -= scale * 0.1  # First move up (z)
-        # wpose.position.y += scale * 0.2  # and sideways (y)
-        # waypoints.append(copy.deepcopy(wpose))
-
-        # wpose.position.x += scale * 0.1  # Second move forward/backwards in (x)
-        # waypoints.append(copy.deepcopy(wpose))
-
-        # wpose.position.y -= scale * 0.1  # Third move sideways (y)
-        # waypoints.append(copy.deepcopy(wpose))
-
-        # We want the Cartesian path to be interpolated at a resolution of 1 cm
-        # which is why we will specify 0.01 as the eef_step in Cartesian
-        # translation.  We will disable the jump threshold by setting it to 0.0,
-        # ignoring the check for infeasible jumps in joint space, which is sufficient
-        # for this tutorial.
 
         print(waypoints)
 
-        plans = []
-        points = []
-        plan = None
-        for i in range(itterations):
-            fraction = 0
-            start_time = time.time()
-            while fraction < 1.0:
-
-                # one of the places where we can preeempt the planning
-                # if self.action_server.is_preempt_requested():
-                #     self.action_server.set_preempted()
-                #     return None
-
-                (plan, fraction) = self.group.compute_cartesian_path(
-                    waypoints, 0.01, 0)  # waypoints to follow # eef_step # jump_threshold
-                # rospy.loginfo("fraction: " + str(fraction))
-                end_time = time.time()
-                if end_time-start_time > timeout:  # if we fail to find a good plan return nothing
-                    print("Time out: " + \
-                        str(timeout) + " reached before fraction: " + \
-                        str(fraction))
-                    # feedback = PathPlannerActionMsgFeedback()
-                    # feedback.feedback = "Time out: " + \
-                    #     str(timeout) + " reached before fraction: " + \
-                    #     str(fraction)
-                    # self.action_server.publish_feedback(feedback)
-                    # if allow_partial_execution:
-                    #     break
-                    # else:
-                    #     return None
-
-            plans.append(plan)
-            points.append(len(plans[0].joint_trajectory.points))
-
-        shortest_plan = min(range(len(points)), key=points.__getitem__)
-        return plans[shortest_plan], fraction
-
-        # (plan, fraction) = move_group.compute_cartesian_path(
-        #     waypoints, 0.01, 0.0  # waypoints to follow  # eef_step
-        # )  # jump_threshold
+        (plan, fraction) = move_group.compute_cartesian_path(
+            waypoints, 0.01, 0.0  # waypoints to follow  # eef_step
+        )  # jump_threshold
 
         # # Note: We are just planning, not asking move_group to actually move the robot yet:
-        # return plan, fraction
-
-        ## END_SUB_TUTORIAL
+        return plan, fraction
 
     def display_trajectory(self, plan):
         # Copy class variables to local variables to make the web tutorials more clear.
@@ -303,23 +238,8 @@ class MissionActionServer(object):
         ## END_SUB_TUTORIAL
 
     def execute_plan(self, plan):
-        # Copy class variables to local variables to make the web tutorials more clear.
-        # In practice, you should use the class variables directly unless you have a good
-        # reason not to.
         move_group = self.move_group
-        # move_group.set_max_velocity_scaling_factor(0.3)
-        # move_group.set_max_acceleration_scaling_factor(0.1)
-        ## BEGIN_SUB_TUTORIAL execute_plan
-        ##
-        ## Executing a Plan
-        ## ^^^^^^^^^^^^^^^^
-        ## Use execute if you would like the robot to follow
-        ## the plan that has already been computed:
         move_group.execute(plan, wait=True)
-
-        ## **Note:** The robot's current joint state must be within some tolerance of the
-        ## first waypoint in the `RobotTrajectory`_ or ``execute()`` will fail
-        ## END_SUB_TUTORIAL
 
 def main():
     try:
@@ -327,19 +247,15 @@ def main():
         print("----------------------------------------------------------")
         print("Welcome to the Mission Action Server")
         print("----------------------------------------------------------")
-        # print("Press Ctrl-D to exit at any time")
-        # print("")
-        # input(
-        #     "============ Press `Enter` to begin the tutorial by setting up the moveit_commander ..."
-        # )
+
         tutorial = MissionActionServer()
         tutorial.move_group.set_goal_tolerance(0.005)  # 1/2 cm
-        tutorial.move_group.set_planner_id("pilz_industrial_motion_planner")
-        tutorial.move_group.set_max_velocity_scaling_factor(0.3)
-        tutorial.move_group.set_max_acceleration_scaling_factor(0.05)
+        tutorial.move_group.set_planner_id("PRMkConfigDefault")
+        # tutorial.move_group.set_max_velocity_scaling_factor(0.3)
+        # tutorial.move_group.set_max_acceleration_scaling_factor(0.1)
         # tutorial.move_group.set_planning_time(1)
 
-        tutorial.reach_named_position("home")
+        # tutorial.reach_named_position("home")
 
         # input(
         #     "============ Press `Enter` to execute a movement using a joint state goal ..."

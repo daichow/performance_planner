@@ -23,9 +23,8 @@
         <joint name="joint_2" value="-0.0133"/>
         <joint name="joint_3" value="0.1215"/>
         <joint name="joint_4" value="1.2577"/>
-        <joint name="joint_5" value="0.0174"/>
-        <joint name="joint_6" value="1.6386"/>
-        <joint name="joint_7" value="0.2256"/>
+        <joint name="joint_5" value="-0.0692"/>
+        <joint name="joint_6" value="-0.1848"/>
     </group_state>
     <group_state name="start" group="arm">
         <joint name="joint_1" value="0"/>
@@ -33,8 +32,7 @@
         <joint name="joint_3" value="0.1215"/>
         <joint name="joint_4" value="0.0441"/>
         <joint name="joint_5" value="0.0174"/>
-        <joint name="joint_6" value="0.0123"/>
-        <joint name="joint_7" value="0.8157"/>
+        <joint name="joint_6" value="-1.7618"/>
     </group_state>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="base_link" link2="forearm_link" reason="Never"/>
