@@ -217,45 +217,46 @@ class MissionActionServer(object):
         move_group = self.move_group
         move_group.execute(plan, wait=True)
 
-def main():
-    try:
-        print("")
-        print("----------------------------------------------------------")
-        print("Welcome to the Mission Action Server")
-        print("----------------------------------------------------------")
+    def main(self):
+        try:
+            print("")
+            print("----------------------------------------------------------")
+            print("Welcome to the Mission Action Server")
+            print("----------------------------------------------------------")
 
-        tutorial = MissionActionServer()
-        tutorial.move_group.set_goal_tolerance(0.005)  # 1/2 cm
-        tutorial.move_group.set_planner_id("RRTConnectkConfigDefault")
-        tutorial.move_group.set_planning_time(10)
-        # print(f"current planner id: {tutorial.move_group.get_planner_id()}")
-        # tutorial.move_group.set_planning_pipeline_id("pilz_industrial_motion_planner")
-        # tutorial.move_group.set_max_velocity_scaling_factor(0.3)
-        # tutorial.move_group.set_max_acceleration_scaling_factor(0.1)
-        # tutorial.move_group.set_planning_time(1)
+            
+            self.move_group.set_goal_tolerance(0.005)  # 1/2 cm
+            # self.move_group.set_planner_id("OMPLPlanner")
+            # self.move_group.set_planning_time(10)
+            # print(f"current planner id: {self.move_group.get_planner_id()}")
+            # self.move_group.set_planning_pipeline_id("pilz_industrial_motion_planner")
+            self.move_group.set_max_velocity_scaling_factor(0.3)
+            self.move_group.set_max_acceleration_scaling_factor(0.1)
+            # self.move_group.set_planning_time(1)
 
-        # tutorial.reach_named_position("vertical")
-        # tutorial.reach_joint_angles()
-        # tutorial.go_to_pose_goal()
-        cartesian_plan, fraction = tutorial.plan_cartesian_path()
-        tutorial.display_trajectory(cartesian_plan)
+            # self.reach_named_position("vertical")
+            # self.reach_joint_angles()
+            # self.go_to_pose_goal()
+            cartesian_plan, fraction = self.plan_cartesian_path()
+            self.display_trajectory(cartesian_plan)
 
-        # for point in cartesian_plan.joint_trajectory.points:
-        #     tutorial.reach_joint_angles(0.005, point.positions)
-        # print(cartesian_plan.joint_trajectory.points)
-        tutorial.execute_plan(cartesian_plan)
+            # for point in cartesian_plan.joint_trajectory.points:
+            #     self.reach_joint_angles(0.005, point.positions)
+            # print(cartesian_plan.joint_trajectory.points)
+            self.execute_plan(cartesian_plan)
 
 
-        # actual_pose = tutorial.get_cartesian_pose()
-        # actual_pose.position.z -= 0.1
-        # # actual_pose.orientation.y += 0.2
-        # tutorial.reach_cartesian_pose(pose=actual_pose, tolerance=0.01, constraints=None)
+            # actual_pose = self.get_cartesian_pose()
+            # actual_pose.position.z -= 0.1
+            # # actual_pose.orientation.y += 0.2
+            # self.reach_cartesian_pose(pose=actual_pose, tolerance=0.01, constraints=None)
 
-    except rospy.ROSInterruptException:
-        return
-    except KeyboardInterrupt:
-        return
+        except rospy.ROSInterruptException:
+            return
+        except KeyboardInterrupt:
+            return
 
 
 if __name__ == "__main__":
-    main()
+    bot = MissionActionServer()
+    bot.main()
