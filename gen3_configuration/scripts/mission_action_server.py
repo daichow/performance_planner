@@ -119,8 +119,8 @@ class MissionActionServer(object):
         # Set the target
         print(f"All possible named target values: {arm_group.get_named_targets()}")
         arm_group.set_named_target(target)
-        arm_group.set_max_velocity_scaling_factor(1.0)
-        arm_group.set_max_acceleration_scaling_factor(1.0)
+        # arm_group.set_max_velocity_scaling_factor(1.0)
+        # arm_group.set_max_acceleration_scaling_factor(1.0)
         # Plan the trajectory
         (success_flag, trajectory_message,
          planning_time, error_code) = arm_group.plan()
@@ -230,11 +230,11 @@ class MissionActionServer(object):
             # self.move_group.set_planning_time(10)
             # print(f"current planner id: {self.move_group.get_planner_id()}")
             # self.move_group.set_planning_pipeline_id("pilz_industrial_motion_planner")
-            self.move_group.set_max_velocity_scaling_factor(0.3)
-            self.move_group.set_max_acceleration_scaling_factor(0.1)
+            self.move_group.set_max_velocity_scaling_factor(1.0)
+            self.move_group.set_max_acceleration_scaling_factor(0.6)
             # self.move_group.set_planning_time(1)
 
-            # self.reach_named_position("vertical")
+            self.reach_named_position("retract")
             # self.reach_joint_angles()
             # self.go_to_pose_goal()
             cartesian_plan, fraction = self.plan_cartesian_path()
