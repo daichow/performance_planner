@@ -48,22 +48,26 @@ RUN apt-get update && apt-get -y install \
 RUN mkdir -p /catkin_ws/src
 WORKDIR /catkin_ws
 
-#copy ROS packages into container
-COPY  ros_kortex /catkin_ws/src/ros_kortex
-# COPY  tbot_bringup /catkin_ws/src/tbot_bringup
-# COPY  tbot_gripper /catkin_ws/src/tbot_gripper
-# COPY  tbot_path_planning /catkin_ws/src/tbot_path_planning
-# COPY  tbot_scripts /catkin_ws/src/tbot_scripts
-# COPY  tbot_vision /catkin_ws/src/tbot_vision
-
 # configure conman
 RUN conan config set general.revisions_enabled=1 \
     && conan profile new default --detect > /dev/null \
     && conan profile update settings.compiler.libcxx=libstdc++11 default
 
+# download ros kortex 
+RUN wget -c https://github.com/Kinovarobotics/ros_kortex/archive/refs/heads/noetic-devel.tar.gz -O - | tar -xz -C /catkin_ws/src
+# RUN mv /catkin_ws/src/ros_kortex-noetic-devel /catkin_ws/src/ros_kortex
+
 # download ros kortex vision
-RUN wget -c https://github.com/Kinovarobotics/ros_kortex_vision/archive/refs/tags/1.1.4.tar.gz -O - | tar -xz -C /catkin_ws/src
-RUN mv /catkin_ws/src/ros_kortex_vision-1.1.4 /catkin_ws/src/ros_kortex_vision
+# RUN wget -c https://github.com/Kinovarobotics/ros_kortex_vision/archive/refs/tags/1.1.4.tar.gz -O - | tar -xz -C /catkin_ws/src
+# RUN mv /catkin_ws/src/ros_kortex_vision-1.1.4 /catkin_ws/src/ros_kortex_vision
+
+#copy ROS packages into container
+# COPY  ros_kortex-noetic-devel /catkin_ws/src/ros_kortex
+# COPY  tbot_bringup /catkin_ws/src/tbot_bringup
+# COPY  tbot_gripper /catkin_ws/src/tbot_gripper
+# COPY  tbot_path_planning /catkin_ws/src/tbot_path_planning
+# COPY  tbot_scripts /catkin_ws/src/tbot_scripts
+# COPY  tbot_vision /catkin_ws/src/tbot_vision
 
 # install ros package dependencies
 RUN rosdep install --from-paths src --ignore-src -y

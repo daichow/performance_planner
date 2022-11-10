@@ -1,14 +1,13 @@
 <launch>
 
 
-
-  <include file="$(find gen3_configuration)/launch/planning_context.launch" >
+  <include file="$(find gen3_configuration)/launch/planning_context.launch">
     <arg name="load_robot_description" value="true" />
   </include>
 
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-    <param name="/use_gui" value="false"/>
-    <rosparam param="/source_list">[/my_gen3/joint_states]</rosparam>
+    <param name="/use_gui" value="false" />
+    <rosparam param="/source_list">[kortex_robot/joint_states]</rosparam>
   </node>
 
   <!-- <node pkg="robot_state_publisher" name="robot_state_publisher" type="robot_state_publisher" /> -->
@@ -18,7 +17,7 @@
   </include>
 
   <include file="$(find gen3_configuration)/launch/moveit_rviz.launch">
-    <arg name="rviz_config" value="$(find gen3_configuration)/launch/moveit.rviz"/>
+    <arg name="rviz_config" value="$(find gen3_configuration)/launch/moveit.rviz" />
   </include>
 
 </launch>

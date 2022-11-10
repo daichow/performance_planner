@@ -14,6 +14,7 @@ from math import pi, tau, dist, fabs, cos
 from std_msgs.msg import String
 from moveit_commander.conversions import pose_to_list
 
+
 def all_close(goal, actual, tolerance):
     """
     Convenience method for testing if the values in two lists are within a tolerance of each other.
@@ -43,6 +44,7 @@ def all_close(goal, actual, tolerance):
 
     return True
 
+
 class MissionActionServer(object):
     """MissionActionServer"""
 
@@ -52,19 +54,23 @@ class MissionActionServer(object):
         rospy.init_node("mission_as", )
 
         try:
-            self.degrees_of_freedom = rospy.get_param(rospy.get_namespace() + "degrees_of_freedom", 6)
+            self.degrees_of_freedom = rospy.get_param(
+                rospy.get_namespace() + "degrees_of_freedom", 6)
 
             arm_group_name = "arm"
-            self.robot = moveit_commander.RobotCommander("my_gen3/robot_description")
-            self.scene = moveit_commander.PlanningSceneInterface(ns=rospy.get_namespace())
-            self.move_group = moveit_commander.MoveGroupCommander(arm_group_name, ns=rospy.get_namespace())
+            self.robot = moveit_commander.RobotCommander()
+            self.scene = moveit_commander.PlanningSceneInterface(
+                ns=rospy.get_namespace())
+            self.move_group = moveit_commander.MoveGroupCommander(
+                arm_group_name, ns=rospy.get_namespace())
             self.display_trajectory_publisher = rospy.Publisher(rospy.get_namespace() + 'move_group/display_planned_path',
-                                                            moveit_msgs.msg.DisplayTrajectory,
-                                                            queue_size=20)
+                                                                moveit_msgs.msg.DisplayTrajectory,
+                                                                queue_size=20)
 
-            rospy.loginfo("Initializing node in namespace " + rospy.get_namespace())
+            rospy.loginfo("Initializing node in namespace " +
+                          rospy.get_namespace())
         except Exception as e:
-            print (e)
+            print(e)
         else:
             print("successfully initialized")
 
@@ -77,7 +83,7 @@ class MissionActionServer(object):
         rospy.loginfo(pose.pose)
 
         return pose.pose
-    
+
     def reach_joint_angles(self, tolerance, joint_positions=[]):
         arm_group = self.move_group
         success = True
@@ -98,7 +104,7 @@ class MissionActionServer(object):
         # joint_positions[4] = 0
         # joint_positions[5] = pi/2
         arm_group.set_joint_value_target(joint_positions)
-        
+
         # Plan and execute in one command
         success &= arm_group.go(wait=True)
 
@@ -107,7 +113,7 @@ class MissionActionServer(object):
         # rospy.loginfo("Printing current joint positions after movement :")
         # for p in new_joint_positions: rospy.loginfo(p)
         return success
-    
+
     def reach_named_position(self, target):
         """ This function makes the robot reach a named position defined in the 
         moveit wizard"""
@@ -117,7 +123,8 @@ class MissionActionServer(object):
         # Going to one of those targets
         rospy.loginfo("Going to named target " + target)
         # Set the target
-        print(f"All possible named target values: {arm_group.get_named_targets()}")
+        print(
+            f"All possible named target values: {arm_group.get_named_targets()}")
         arm_group.set_named_target(target)
         # arm_group.set_max_velocity_scaling_factor(1.0)
         # arm_group.set_max_acceleration_scaling_factor(1.0)
@@ -156,10 +163,10 @@ class MissionActionServer(object):
 
         current_pose = self.move_group.get_current_pose().pose
         return all_close(pose_goal, current_pose, 0.01)
-    
+
     def reach_cartesian_pose(self, pose, tolerance, constraints):
         arm_group = self.move_group
-        
+
         # Set the tolerance
         arm_group.set_goal_position_tolerance(tolerance)
 
@@ -224,15 +231,15 @@ class MissionActionServer(object):
             print("Welcome to the Mission Action Server")
             print("----------------------------------------------------------")
 
-            
             self.move_group.set_goal_tolerance(0.005)  # 1/2 cm
-            # self.move_group.set_planner_id("OMPLPlanner")
-            # self.move_group.set_planning_time(10)
-            # print(f"current planner id: {self.move_group.get_planner_id()}")
-            # self.move_group.set_planning_pipeline_id("pilz_industrial_motion_planner")
+            print(
+                f"current planner id: {self.move_group.get_planning_pipeline_id()}")
+            # self.move_group.set_planning_pipeline_id('ompl')
+            # self.move_group.set_planner_id("SPARS")
+            self.move_group.set_planning_time(1.0)
+            self.move_group.set_num_planning_attempts(10)
             self.move_group.set_max_velocity_scaling_factor(1.0)
-            self.move_group.set_max_acceleration_scaling_factor(0.6)
-            # self.move_group.set_planning_time(1)
+            self.move_group.set_max_acceleration_scaling_factor(0.8)
 
             self.reach_named_position("retract")
             # self.reach_joint_angles()
@@ -244,7 +251,6 @@ class MissionActionServer(object):
             #     self.reach_joint_angles(0.005, point.positions)
             # print(cartesian_plan.joint_trajectory.points)
             self.execute_plan(cartesian_plan)
-
 
             # actual_pose = self.get_cartesian_pose()
             # actual_pose.position.z -= 0.1
